@@ -3,7 +3,9 @@ pragma solidity =0.8.17;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
 import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
+import {IStakingForAnother} from "./interfaces/IStakingForAnother.sol";
 
 error AlreadyClaimed();
 error InvalidProof();
@@ -14,11 +16,15 @@ contract MerkleDistributor is IMerkleDistributor {
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
 
+    // Staking contract is used to send the amounts with the #stakeFor function.
+    address public immutable stakingContract;
+
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address token_, bytes32 merkleRoot_) {
+    constructor(address token_, address stakingContract_, bytes32 merkleRoot_) {
         token = token_;
+        stakingContract = stakingContract_;
         merkleRoot = merkleRoot_;
     }
 
@@ -36,21 +42,32 @@ contract MerkleDistributor is IMerkleDistributor {
         claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
     }
 
-    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof)
-        public
-        virtual
-        override
-    {
+    function _verifyAndSet(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) private {
         if (isClaimed(index)) revert AlreadyClaimed();
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
         if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
-        // Mark it claimed and send the token.
         _setClaimed(index);
-        IERC20(token).safeTransfer(account, amount);
+    }
 
+    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof)
+        public
+        virtual
+        override
+    {
+        _verifyAndSet(index, account, amount, merkleProof);
+        IERC20(token).safeTransfer(account, amount);
         emit Claimed(index, account, amount);
+    }
+
+    function claimAndStake(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof)
+        public
+        virtual
+    {
+        _verifyAndSet(index, account, amount, merkleProof);
+        IStakingForAnother(stakingContract).stakeFor(account, amount);
+        emit ClaimedAndStaked(index, account, amount);
     }
 }

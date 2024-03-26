@@ -27,13 +27,8 @@ module.exports = {
         },
       },
     },
-    tenderly: {
-      chainId: 1,
-      url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    mainnet: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`, // or any other JSON-RPC provider
+    forknet: {
+      url: `http://127.0.2.1:8547`, // or any other JSON-RPC provider
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
