@@ -52,22 +52,23 @@ contract MerkleDistributor is IMerkleDistributor {
         _setClaimed(index);
     }
 
-    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof)
+    function claim(uint256 index, uint256 amount, bytes32[] calldata merkleProof)
         public
         virtual
         override
     {
-        _verifyAndSet(index, account, amount, merkleProof);
-        IERC20(token).safeTransfer(account, amount);
-        emit Claimed(index, account, amount);
+        _verifyAndSet(index, msg.sender, amount, merkleProof);
+        IERC20(token).safeTransfer(msg.sender, amount);
+        emit Claimed(index, msg.sender, amount);
     }
 
-    function claimAndStake(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof)
+    function claimAndStake(uint256 index, uint256 amount, bytes32[] calldata merkleProof)
         public
         virtual
     {
-        _verifyAndSet(index, account, amount, merkleProof);
-        IStakingForAnother(stakingContract).stakeFor(account, amount);
-        emit ClaimedAndStaked(index, account, amount);
+        _verifyAndSet(index, msg.sender, amount, merkleProof);
+        IERC20(token).safeApprove(stakingContract, amount);
+        IStakingForAnother(stakingContract).stakeFor(msg.sender, amount);
+        emit ClaimedAndStaked(index, msg.sender, amount);
     }
 }

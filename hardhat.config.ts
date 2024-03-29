@@ -5,6 +5,8 @@ require('dotenv').config()
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 
+import "@nomicfoundation/hardhat-verify";
+
 module.exports = {
   solidity: {
     compilers: [
@@ -18,6 +20,11 @@ module.exports = {
         },
       },
     ],
+  },
+  etherscan: {
+    apiKey: {
+      arbitrumOne: process.env.FLU_ARBISCAN_API
+    }
   },
   networks: {
     hardhat: {

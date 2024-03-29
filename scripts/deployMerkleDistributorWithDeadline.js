@@ -8,11 +8,11 @@ async function main() {
     // FLY token
     '0x000F1720A263f96532D1ac2bb9CDC12b72C6f386',
     // staking contract
-    '0x0000000000000000000000000000000000000000',
+    '0x9E8892E443AD6472e4D9362DF6D0C238000028a3',
     // merkle root
-    '0xcbf305713016aab955877565fd0d0bf95f3cf274d21752dc82b327e0d197a028',
-    // latest timestamp
-    1791358941
+    '0x6f506a82a58736e1f65f2c9be6ecdc9924cb9462f25f1641bc5bb1e62e8a1b0b',
+    // last timestamp (2nd of may 2pm UTC)
+    1714608000.0
   )
   await merkleDistributorWithDeadline.deployed()
   console.log(`merkleDistributorWithDeadline deployed at ${merkleDistributorWithDeadline.address}`)
